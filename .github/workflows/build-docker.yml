@@ -34,8 +34,8 @@ jobs:
           context: .
           file: Dockerfile
           push: false
-          cache-to: type=gha, mode=max, scope="grpc"
-          cache-from: type=gha, scope="grpc"
+          cache-to: type=gha, mode=max, scope=grpc
+          cache-from: type=gha, scope=grpc
           target: grpc
 
       - name: Extract metadata for Docker
@@ -58,6 +58,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=gha, scope="final"
-            type=gha, scope="grpc"
-          cache-to: type=gha, mode=max, scope="final"
+            type=gha, scope=final
+            type=gha, scope=grpc
+          cache-to: type=gha, mode=max, scope=final
