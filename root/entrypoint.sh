@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /app
+cd /build
 
 echo "@@@@@"
 echo "CPU info:"

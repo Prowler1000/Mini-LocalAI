@@ -2,7 +2,7 @@ ARG BUILD_DISTRO=ubuntu
 ARG FINAL_DISTRO=alpine
 ARG UBUNTU_TAG=20.04
 ARG ALPINE_TAG=latest
-ARG APP_DIR=app
+ARG APP_DIR=build
 ARG LOCALAI_VERSION=v2.12.4
 
 ARG GRPC_BACKENDS=backend-assets/grpc/llama-cpp
@@ -155,7 +155,8 @@ COPY --from=grpc /build/grpc/output /usr/local
 ENV PATH=/usr/local/bin:$PATH
 RUN make build
 
-FROM base-${FINAL_DISTRO} AS final
+#FROM base-${FINAL_DISTRO} AS final
+FROM localai-builder AS final
 ARG HEALTHCHECK_ENDPOINT
 ARG APP_DIR
 
@@ -166,7 +167,7 @@ WORKDIR /
 RUN mkdir -p \
     /$APP_DIR/models
 
-COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
+#COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
 
 COPY --from=grpc /build/grpc/output /usr/local
 ENV PATH=/usr/local/bin:$PATH
