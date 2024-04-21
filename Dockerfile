@@ -155,7 +155,7 @@ COPY --from=grpc /build/grpc/output /usr/local
 ENV PATH=/usr/local/bin:$PATH
 RUN make build
 
-FROM base-${FINAL_DISTRO} AS final
+#FROM base-${FINAL_DISTRO} AS final
 #FROM localai-builder AS final
 ARG HEALTHCHECK_ENDPOINT
 ARG APP_DIR
@@ -168,10 +168,10 @@ WORKDIR /
 RUN mkdir -p \
     /$APP_DIR/models
 
-COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
+#COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
 
-COPY --from=grpc /build/grpc/output /usr/local
-ENV PATH=/usr/local/bin:$PATH
+#COPY --from=grpc /build/grpc/output /usr/local
+#ENV PATH=/usr/local/bin:$PATH
 
 COPY root/entrypoint.sh /$APP_DIR/entrypoint.sh
 RUN chmod +x /$APP_DIR/entrypoint.sh
