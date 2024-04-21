@@ -54,7 +54,7 @@ RUN apk add \
         py3-pip \
         unzip \
         opencv-dev
-# Install grpcio-tools (the version in 22.04 is too old)
+# Install grpcio-tools
 RUN apk add py3-grpcio
 
 FROM builder-${BUILD_DISTRO} AS builder
