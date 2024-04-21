@@ -1,0 +1,63 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+  workflow_dispatch:
+
+
+env:
+  IS_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
+  TEST_TAG: prowler1000/mini-localai:test
+  IMAGE_PATH: mini-localai
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build gRPC
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          cache-to: type=gha, mode=max, scope="grpc"
+          cache-from: type=gha, scope="grpc"
+          target: grpc
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images:
+            prowler1000/${{ env.IMAGE_PATH }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=stable,enable=${{ env.IS_DEFAULT_BRANCH == 'true' }}
+            type=ref,event=branch,enable=${{ env.IS_DEFAULT_BRANCH == 'false' }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=gha, scope="final"
+            type=gha, scope="grpc"
+          cache-to: type=gha, mode=max, scope="final"
