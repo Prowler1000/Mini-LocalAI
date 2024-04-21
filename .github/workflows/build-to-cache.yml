@@ -1,0 +1,66 @@
+name: Build and Cache Docker Images
+
+on:
+    workflow_call:
+        inputs:
+            scope_suffix:
+                required: false
+                type: string
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Parse suffix
+            id: parse
+            run: |
+              if [[ -n "${{ inputs.scope_suffix }}" && "${{ inputs.scope_suffix }}" != _* ]]; then
+                echo "scope_suffix=_${{ inputs.scope_suffix }}" >> "$GITHUB_OUTPUT"
+              else
+                echo "scope_suffix=${{ inputs.scope_suffix }}" >> "$GITHUB_OUTPUT"
+              fi
+          - name: Check Out Repo
+            uses: actions/checkout@v4
+
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v3
+
+          - name: Build gRPC
+            uses: docker/build-push-action@v5
+            with:
+                context: .
+                push: false
+                cache-to: |
+                    type=gha, mode=max, scope=grpc${{ steps.parse.outputs.scope_suffix }}
+                cache-from: |
+                    type=gha, scope=grpc
+                    type=gha, scope=grpc${{ steps.parse.outputs.scope_suffix}}
+                target: grpc
+          - name: Build LocalAI
+            uses: docker/build-push-action@v5
+            with:
+                context: .
+                push: false
+                cache-to: |
+                    type=gha, mode=max, scope=localai${{ steps.parse.outputs.scope_suffix }}
+                cache-from: |
+                    type=gha, scope=grpc
+                    type=gha, scope=grpc${{ steps.parse.outputs.scope_suffix}}
+                    type=gha, scope=localai
+                    type=gha, scope=localai${{ steps.parse.outputs.scope_suffix }}
+
+          - name: Build final
+            uses: docker/build-push-action@v5
+            with:
+                context: .
+                push: false
+                cache-to:
+                    type=gha, mode=max, scope=final${{ steps.parse.outputs.scope_suffix }}
+                cache-from: |
+                    type=gha, scope=grpc
+                    type=gha, scope=grpc${{ steps.parse.outputs.scope_suffix}}
+                    type=gha, scope=localai
+                    type=gha, scope=localai${{ steps.parse.outputs.scope_suffix }}
+                    type=gha, scope=final
+                    type=gha, scope=final${{ steps.parse.outputs.scope_suffix }}
