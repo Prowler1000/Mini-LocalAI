@@ -38,6 +38,18 @@ jobs:
           cache-from: type=gha, scope=grpc
           target: grpc
 
+      - name: Build LocalAI
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          cache-to: type=gha, mode=max, scope=localai
+          cache-from: |
+            type=gha, scope=grpc
+            type=gha, scope=localai
+          target: localai-builder
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -57,7 +69,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-to: type=gha, mode=max, scope=final
           cache-from: |
             type=gha, scope=final
             type=gha, scope=grpc
-          cache-to: type=gha, mode=max, scope=final
+            type=gha, scope=localai
