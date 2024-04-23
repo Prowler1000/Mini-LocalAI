@@ -57,10 +57,10 @@ jobs:
           context: .
           file: Dockerfile
           push: false
-          cache-to: type=gha, mode=max, scope=localai
+          cache-to: type=gha,mode=max,scope=localai
           cache-from: |
-            type=registry, ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
-            type=gha, scope=localai
+            type=registry,ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
+            type=gha,scope=localai
           target: localai-builder
 
       - name: Extract metadata for Docker
@@ -82,8 +82,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-to: type=gha, mode=max, scope=final
+          cache-to: type=gha,mode=max,scope=final
           cache-from: |
-            type=gha, scope=final
-            type=registry, ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
-            type=gha, scope=localai
+            type=gha,scope=final
+            type=registry,ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
+            type=gha,scope=localai
