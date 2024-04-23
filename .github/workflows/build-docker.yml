@@ -9,12 +9,35 @@ env:
   IS_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
   TEST_TAG: prowler1000/mini-localai:test
   IMAGE_PATH: mini-localai
+  LOCALAI_VER: v2.12.4
+  GRPC_VER: v1.58.0
+  GRPC_TAG: ghcr.io/prowler1000/localai_grpc_cache
 
 
 jobs:
+  build_grpc:
+    name: Build gRPC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build gRPC
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          build-args: |
+            GRPC_VERSION=${{ env.GRPC_VER }}
+          cache-to: type=registry,ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }},mode=max
+          cache-from: type=registry,ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
+          target: grpc
+
   build:
     runs-on: ubuntu-latest
-
+    needs: build_grpc
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -28,16 +51,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build gRPC
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile
-          push: false
-          cache-to: type=gha, mode=max, scope=grpc
-          cache-from: type=gha, scope=grpc
-          target: grpc
-
       - name: Build LocalAI
         uses: docker/build-push-action@v5
         with:
@@ -46,7 +59,7 @@ jobs:
           push: false
           cache-to: type=gha, mode=max, scope=localai
           cache-from: |
-            type=gha, scope=grpc
+            type=registry, ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
             type=gha, scope=localai
           target: localai-builder
 
@@ -72,5 +85,5 @@ jobs:
           cache-to: type=gha, mode=max, scope=final
           cache-from: |
             type=gha, scope=final
-            type=gha, scope=grpc
+            type=registry, ref=${{ env.GRPC_TAG }}:${{ env.GRPC_VER }}
             type=gha, scope=localai
