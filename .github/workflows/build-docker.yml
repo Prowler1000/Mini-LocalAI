@@ -36,6 +36,7 @@ jobs:
           target: grpc
 
   build:
+    name: Build Image
     runs-on: ubuntu-latest
     needs: build_grpc
     steps:
