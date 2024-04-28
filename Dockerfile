@@ -1,68 +1,36 @@
-ARG BUILD_DISTRO=ubuntu
-ARG FINAL_DISTRO=ubuntu
 ARG UBUNTU_TAG=20.04
-ARG ALPINE_TAG=latest
-ARG APP_DIR=build
+
 ARG LOCALAI_VERSION=v2.12.4
+ARG GRPC_VERSION=v1.58.0
+
+ARG APP_DIR=build
 
 ARG GRPC_BACKENDS=backend-assets/grpc/llama-cpp
-ARG GRPC_VERSION=v1.58.0
+
 ARG HEALTHCHECK_ENDPOINT=http://localhost:8080/readyz
 
 ############################################
 ############################################
 
-FROM ubuntu:${UBUNTU_TAG} AS base-ubuntu
-ARG UBUNTU_TAG
-RUN echo "Using ubuntu:$UBUNTU_TAG as base image."
+FROM ubuntu:${UBUNTU_TAG} AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
-FROM alpine:${ALPINE_TAG} AS base-alpine
-ARG ALPINE_TAG
-RUN echo "Using alpine:$ALPINE_TAG as base image."
-RUN apk add gcompat bash
-
-FROM base-ubuntu AS builder-ubuntu
+FROM base AS builder
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     cmake \
     curl \
     unzip
-# Copied from later image
+
 RUN apt-get install -y \
         ca-certificates \
         python3-pip \
         unzip \
-        #libopenblas-dev \
         libopencv-dev \
     && \
     apt-get clean
 RUN pip install --user grpcio-tools
-
-FROM base-alpine AS builder-alpine
-RUN apk update && apk add \
-    git \
-    build-base \
-    cmake \
-    curl \
-    unzip \
-    linux-headers
-# Copied from later image
-RUN apk add \
-        ca-certificates \
-        py3-pip \
-        unzip \
-        opencv-dev
-# Install grpcio-tools
-RUN apk add py3-grpcio
-
-FROM builder-${BUILD_DISTRO} AS builder
-ARG BUILD_DISTRO
-RUN echo "Building on $BUILD_DISTRO"
-
-############################################
-############################################
 
 FROM builder AS localai-source
 ARG LOCALAI_VERSION
@@ -155,7 +123,7 @@ COPY --from=grpc /build/grpc/output /usr/local
 ENV PATH=/usr/local/bin:$PATH
 RUN make build
 
-FROM base-${FINAL_DISTRO} AS final
+FROM base AS final
 
 ARG GO_VERSION=1.21.7
 ARG BUILD_TYPE
