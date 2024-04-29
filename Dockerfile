@@ -106,7 +106,8 @@ ARG GRPC_BACKENDS
 ARG MAKEFLAGS
 
 COPY --from=localai-source /build /build
-COPY root/Makefile /build/Makefile
+RUN sed -i -e 's/get-sources: /get-sources: #/g' /build/Makefile && \
+    sed -i -e 's/prepare-sources: get-sources /prepare-sources: get-sources #/g' /build/Makefile
 
 ENV GRPC_BACKENDS=${GRPC_BACKENDS}
 ENV GO_TAGS=${GO_TAGS}
