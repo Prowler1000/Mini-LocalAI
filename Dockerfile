@@ -30,7 +30,7 @@ RUN apt-get install -y \
         libopencv-dev \
     && \
     apt-get clean
-RUN pip install --user grpcio-tools
+RUN apt install -y python3-grpc-tools
 
 FROM builder AS localai-source
 ARG LOCALAI_VERSION
