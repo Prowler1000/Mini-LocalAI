@@ -13,10 +13,8 @@ on:
 env:
   IS_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
   TEST_TAG: prowler1000/mini-localai:test
-  IMAGE_PATH: mini-localai
   LOCALAI_VER: v2.12.4
   GRPC_VER: v1.58.0
-  GRPC_TAG: ghcr.io/prowler1000/localai_grpc_cache
 
 
 jobs:
@@ -81,7 +79,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images:
-            prowler1000/${{ env.IMAGE_PATH }}
+            prowler1000/${{ vars.IMAGE_PATH }}
           tags: |
             type=raw,value=latest
             type=raw,value=stable,enable=${{ env.IS_DEFAULT_BRANCH == 'true' }}
