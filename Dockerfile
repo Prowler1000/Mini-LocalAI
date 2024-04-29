@@ -142,7 +142,8 @@ ENV APP_DIR=${APP_DIR}
 WORKDIR /
 
 RUN mkdir -p \
-    /$APP_DIR/models
+    /$APP_DIR/models \
+    /$APP_DIR/configuration
 
 COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
 
