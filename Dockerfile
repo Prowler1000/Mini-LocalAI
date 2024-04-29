@@ -1,9 +1,9 @@
 ARG UBUNTU_TAG=20.04
 
-ARG LOCALAI_VERSION=v2.12.4
+ARG LOCALAI_VERSION=v2.13.0
 ARG GRPC_VERSION=v1.58.0
 
-ARG APP_DIR=build
+ARG APP_DIR=app
 
 ARG GRPC_BACKENDS=backend-assets/grpc/llama-cpp
 
@@ -106,7 +106,8 @@ ARG GRPC_BACKENDS
 ARG MAKEFLAGS
 
 COPY --from=localai-source /build /build
-COPY root/Makefile /build/Makefile
+RUN sed -i -e 's/get-sources: /get-sources: #/g' /build/Makefile && \
+    sed -i -e 's/prepare-sources: get-sources /prepare-sources: get-sources #/g' /build/Makefile
 
 ENV GRPC_BACKENDS=${GRPC_BACKENDS}
 ENV GO_TAGS=${GO_TAGS}
@@ -127,8 +128,6 @@ FROM base AS final
 
 ARG GO_VERSION=1.21.7
 ARG BUILD_TYPE
-ARG CUDA_MAJOR_VERSION=11
-ARG CUDA_MINOR_VERSION=7
 ARG TARGETARCH
 ARG TARGETVARIANT
 
@@ -141,7 +140,8 @@ ENV APP_DIR=${APP_DIR}
 WORKDIR /
 
 RUN mkdir -p \
-    /$APP_DIR/models
+    /$APP_DIR/models \
+    /$APP_DIR/configuration
 
 COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
 
