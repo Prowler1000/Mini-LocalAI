@@ -39,7 +39,7 @@ jobs:
           context: .
           build-args: |
             GRPC_VERSION=${{ env.GRPC_VER }}
-          cache-to: type=registry,ref=${{ vars.GRPC_TAG }}:${{ env.GRPC_VER }},mode=max
+          cache-to: type=registry,ref=${{ vars.GRPC_TAG }}:${{ env.GRPC_VER }}
           cache-from: type=registry,ref=${{ vars.GRPC_TAG }}:${{ env.GRPC_VER }}
           target: grpc
 
@@ -73,7 +73,7 @@ jobs:
           context: .
           file: Dockerfile
           push: false
-          cache-to: type=gha,mode=max,scope=localai
+          cache-to: type=gha,scope=localai
           cache-from: |
             type=registry,ref=${{ vars.GRPC_TAG }}:${{ env.GRPC_VER }}
             type=gha,scope=localai
@@ -98,7 +98,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-to: type=gha,mode=max,scope=final
+          cache-to: type=gha,scope=final
           cache-from: |
             type=registry,ref=${{ vars.GRPC_TAG }}:${{ env.GRPC_VER }}
             type=gha,scope=final
