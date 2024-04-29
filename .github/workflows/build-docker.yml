@@ -12,7 +12,7 @@ env:
   IS_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
   TEST_TAG: prowler1000/mini-localai:test
   IMAGE_PATH: mini-localai
-  LOCALAI_VER: v2.12.4
+  LOCALAI_VER: v2.13.0
   GRPC_VER: v1.58.0
   GRPC_TAG: ghcr.io/prowler1000/localai_grpc_cache
 
