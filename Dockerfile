@@ -125,7 +125,14 @@ ENV PATH=/usr/local/bin:$PATH
 RUN make build
 
 FROM base AS final
+# Do large layers first to minimize the need to re-download them
+# when other steps have changed
+COPY --from=grpc /build/grpc/output /usr/local
+ENV PATH=/usr/local/bin:$PATH
 
+COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
+
+# Declare args
 
 ARG HEALTHCHECK_ENDPOINT
 ARG APP_DIR
@@ -138,11 +145,6 @@ WORKDIR /
 RUN mkdir -p \
     /$APP_DIR/models \
     /$APP_DIR/configuration
-
-COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
-
-COPY --from=grpc /build/grpc/output /usr/local
-ENV PATH=/usr/local/bin:$PATH
 
 COPY root/entrypoint.sh /$APP_DIR/entrypoint.sh
 RUN chmod +x /$APP_DIR/entrypoint.sh
