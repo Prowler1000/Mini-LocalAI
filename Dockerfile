@@ -130,6 +130,10 @@ FROM base AS final
 COPY --from=grpc /build/grpc/output /usr/local
 ENV PATH=/usr/local/bin:$PATH
 
+RUN mkdir -p \
+    /$APP_DIR/models \
+    /$APP_DIR/configuration
+
 COPY --from=localai-builder /build/local-ai /$APP_DIR/local-ai
 
 # Declare args
@@ -141,10 +145,6 @@ ENV HEALTHCHECK_ENDPOINT=${HEALTHCHECK_ENDPOINT}
 ENV APP_DIR=${APP_DIR}
 
 WORKDIR /
-
-RUN mkdir -p \
-    /$APP_DIR/models \
-    /$APP_DIR/configuration
 
 COPY root/entrypoint.sh /$APP_DIR/entrypoint.sh
 RUN chmod +x /$APP_DIR/entrypoint.sh
